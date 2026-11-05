@@ -16,10 +16,10 @@ This is a plan, not a promise. The order of the tiers matters more than the date
 
 ## Milestone 2: geometry and tools (late November)
 
-* \[ ] Vertex and index buffers with staging uploads
+* \[x] Vertex and index buffers with staging uploads
 * \[ ] Depth buffering
-* \[ ] Free camera
-* \[ ] ImGui debug UI
+* \[x] Free camera
+* \[x] ImGui debug UI
 * \[ ] GPU memory with VMA
 
 ## Milestone 3: assets (December)
