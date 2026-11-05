@@ -7,7 +7,7 @@ file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
 
 # 2. TARGET CREATION
 # Bundles all the discovered C++ files into a single Static Library named "engine".
-add_library(engine STATIC ${ENGINE_SOURCES} "Vulkan/Instance.h" "Vulkan/Instance.cpp" "Vulkan/ValidationLayers.h" "Vulkan/ValidationLayers.cpp" "Vulkan/Device.h" "Vulkan/Device.cpp" "Vulkan/Window.cpp" "Vulkan/Window.h" "Vulkan/Pipeline.h" "Vulkan/Pipeline.cpp" "Vulkan/CommandPool.cpp" "Vulkan/vlk.h"  "Vulkan/vlk.cpp" "Renderer/Vertex.h" "Renderer/Buffers.cpp" "Renderer/Buffers.h")
+add_library(engine STATIC ${ENGINE_SOURCES} "Renderer/Camera.h" "Time.cpp" "Renderer/UI.h")
 
 # Automatically mirrors your actual folder structure (e.g., core/, renderer/) inside 
 # Visual Studio's Solution Explorer so everything stays organized.
@@ -29,6 +29,7 @@ target_link_libraries(engine PUBLIC
   volk::volk                       # Vulkan meta-loader
   spdlog::spdlog                   # Logging
   GPUOpen::VulkanMemoryAllocator   # Memory management
+  imgui::imgui                     # GUI
 )
 
 # 5. C++ PREPROCESSOR MACROS (#defines)

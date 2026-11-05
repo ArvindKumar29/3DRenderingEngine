@@ -1,4 +1,5 @@
 #include "CommandPool.h"
+#include "..\Renderer\Camera.h"
 
 namespace VKRENDERER
 {
@@ -25,7 +26,7 @@ namespace VKRENDERER
 		cmdBuffer = std::move(vk::raii::CommandBuffers(ld, allocInfo).front());
 	}
 
-	void CommandPool::recordCommandBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, vk::ImageView imageView, vk::Extent2D extent, vk::raii::Pipeline& pipeline, vertexBuffer& vertexBuffer, indexBuffer& indexBuffer)
+	void CommandPool::recordCommandBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, vk::ImageView imageView, vk::Extent2D extent, vk::raii::Pipeline& pipeline, vk::raii::PipelineLayout& pipelineLayout, vertexBuffer& vertexBuffer, indexBuffer& indexBuffer, glm::mat4 view, glm::mat4 proj, glm::mat4 model)
 	{
 		
 		// Clear screen and set clear color
@@ -58,10 +59,15 @@ namespace VKRENDERER
 		cmdBuffer.bindVertexBuffers(0, *vertexBuffer.buffer, { 0 });
 		cmdBuffer.bindIndexBuffer(*indexBuffer.buffer, 0, vk::IndexType::eUint32);
 
+		// Setting up push constants
+		cmdBuffer.pushConstants(*pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &view);
+		cmdBuffer.pushConstants(*pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4), sizeof(glm::mat4), &proj);
+		cmdBuffer.pushConstants(*pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4) * 2, sizeof(glm::mat4), &model);
 
 		// Final draw command
 		//cmdBuffer.draw(static_cast<uint32_t>(vertexBuffer.VB.size()), 1, 0, 0);
 		cmdBuffer.drawIndexed(static_cast<uint32_t>(indexBuffer.IB.size()), 1, 0, 0, 0);
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmdBuffer);
 
 		cmdBuffer.endRendering();
 		//cmdBuffer.end();

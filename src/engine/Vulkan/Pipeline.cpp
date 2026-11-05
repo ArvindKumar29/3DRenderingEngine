@@ -82,7 +82,13 @@ namespace VKRENDERER
 			.setAttachments(colorBlendAttachment);
 
 		// Pipeline Layout
-		vk::PipelineLayoutCreateInfo layoutCreateInfo{};
+		vk::PushConstantRange pushConstantRange = vk::PushConstantRange()
+			.setStageFlags(vk::ShaderStageFlagBits::eVertex)
+			.setOffset(0)
+			.setSize(sizeof(glm::mat4) * 3);
+
+		vk::PipelineLayoutCreateInfo layoutCreateInfo = vk::PipelineLayoutCreateInfo()
+			.setPushConstantRanges(pushConstantRange);
 		graphicsPipeLineLayout = vk::raii::PipelineLayout(ld, layoutCreateInfo);
 
 		// Dynamic Rendering

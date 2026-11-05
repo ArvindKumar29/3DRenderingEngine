@@ -7,7 +7,14 @@
     "volk",
     "spdlog",
     "vulkan-memory-allocator",
-    "stb"
+    "stb",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "vulkan-binding"
+      ]
+    }
   ],
   "builtin-baseline": "5363acb796e576328288fae60c25304e227e9839"
 }

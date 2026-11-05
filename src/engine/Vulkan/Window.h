@@ -40,6 +40,7 @@ namespace VKRENDERER
 		vk::raii::SurfaceKHR surface = nullptr;
 		vk::raii::SwapchainKHR swapChain = nullptr;
 		vk::SurfaceFormatKHR swapChainSurfaceFormat;
+		uint32_t swapChainMinImageCount = 0;
 		std::vector<vk::raii::ImageView> swapChainImageViews;
 		vk::Extent2D                     swapChainExtent;
 		std::vector<vk::Image>           swapChainImages;

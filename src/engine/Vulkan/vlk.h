@@ -9,7 +9,11 @@
 #include "CommandPool.h"
 #include <spdlog/spdlog.h>
 #include "../Renderer/Buffers.h"
+#include "../Renderer/Input.h"
 #include "../Renderer/Vertex.h"
+#include "../Renderer/Camera.h"
+#include "../Renderer/UI.h"
+#include "../Time.h"
 
 namespace VKRENDERER
 {
@@ -43,9 +47,23 @@ namespace VKRENDERER
 		// Renderer Stuff
 		Pipeline pipeline;
 		CommandPool cmdPool;
+		Input inputSystem;
+		Camera camera;
+		Time time;
+		UI ui;
+
+		struct pushConstantData
+		{
+			glm::mat4 model;
+			glm::mat4 view;
+			glm::mat4 proj;
+		} pc;
+
+		glm::mat4 modelMatrix = glm::mat4(1.0f);
 
 		const std::vector<const char*> deviceExtensions = {
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+			VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
 		};
 	};
 }

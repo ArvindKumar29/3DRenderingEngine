@@ -1,4 +1,5 @@
 #include "vlk.h"
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace VKRENDERER
 {
@@ -8,6 +9,11 @@ namespace VKRENDERER
 	vlk::~vlk()
 	{
 		device.logicalDevice.waitIdle();
+
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+		ui.pool = nullptr;
 
 		cmdPool.cmdBuffer = nullptr;
 		cmdPool.cmdPool = nullptr;
@@ -50,6 +56,7 @@ namespace VKRENDERER
 		uint32_t width = 1920, height = 1080;
 		const char* title = "Rendering Engine";
 		m_window = window.initWindow(width, height, title);
+		inputSystem.Init(m_window);
 
 		// Creating Vulkan Instance and Setting up Validation Layers
 		vulkanInstance.init(ctx);
@@ -90,15 +97,51 @@ namespace VKRENDERER
 
 		pipeline.createSyncObjects(device.logicalDevice);
 
+		ui.init(window, device, vulkanInstance.instance);
 	}
 
 
 	void vlk::run()
 	{
 		init();
+		time.updateDeltaTime();
+		float dt = time.getDeltaTime();
 		while (!glfwWindowShouldClose(m_window))
 		{
+			inputSystem.updateKeyStates();
+			ui.renderFrame(camera);
 			glfwPollEvents();
+			if (inputSystem.isKeyHeld(GLFW_KEY_ESCAPE))
+				glfwSetWindowShouldClose(m_window, true);
+			float moveSpeed = 0.05f;
+			glm::vec3 camPos = camera.getPosition();
+			glm::vec3 camRight = glm::normalize(glm::cross(camera.getFront(), WORLD_UP));
+
+			if (inputSystem.isKeyHeld(GLFW_KEY_W))
+				camPos += camera.getFront() * moveSpeed * dt; 
+			if (inputSystem.isKeyHeld(GLFW_KEY_S))
+				camPos -= camera.getFront() * moveSpeed * dt; 
+			if (inputSystem.isKeyHeld(GLFW_KEY_A))
+				camPos -= camRight * moveSpeed * dt;     
+			if (inputSystem.isKeyHeld(GLFW_KEY_D))
+				camPos += camRight * moveSpeed * dt;     
+			camera.setPosition(camPos);
+
+
+			glm::vec2 mouseDelta = inputSystem.isMouseMoved();
+			if (mouseDelta != glm::vec2(0.0f, 0.0f))
+			{
+				float sensitivity = 0.1f;
+				glm::vec3 currentRot = camera.getRotation();
+				currentRot.y += mouseDelta.x * sensitivity * dt;
+				currentRot.x -= mouseDelta.y * sensitivity * dt;
+
+				if (currentRot.x > 89.0f)  currentRot.x = 89.0f;
+				if (currentRot.x < -89.0f) currentRot.x = -89.0f;
+
+				camera.setRotation(currentRot);
+			}
+			camera.update();
 			renderFrame();
 		}
 
@@ -124,7 +167,7 @@ namespace VKRENDERER
 		
 		
 		window.transitionImageLayout(cmdPool.cmdBuffer, imageIndex, vk::ImageLayout::eUndefined, vk::ImageLayout::eAttachmentOptimal, vk::AccessFlags2(), vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eTopOfPipe, vk::PipelineStageFlagBits2::eColorAttachmentOutput);
-		cmdPool.recordCommandBuffer(device.logicalDevice, device.physicalDevice, window.swapChainImageViews[imageIndex], window.swapChainExtent, pipeline.graphicsPipeline, vb, ib);
+		cmdPool.recordCommandBuffer(device.logicalDevice, device.physicalDevice, window.swapChainImageViews[imageIndex], window.swapChainExtent, pipeline.graphicsPipeline, pipeline.graphicsPipeLineLayout, vb, ib, camera.getViewMatrix(), camera.getProjectionMatrix(), modelMatrix);
 		window.transitionImageLayout(cmdPool.cmdBuffer, imageIndex, vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::ePresentSrcKHR, vk::AccessFlagBits2::eColorAttachmentWrite, vk::AccessFlags2(), vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eBottomOfPipe);
 
 		cmdPool.cmdBuffer.end();

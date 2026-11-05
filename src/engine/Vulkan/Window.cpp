@@ -12,6 +12,7 @@ namespace VKRENDERER
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		return window;
 	}
 
@@ -31,6 +32,7 @@ namespace VKRENDERER
 		auto surfaceCapabilities = pd.getSurfaceCapabilitiesKHR(*surface);
 		swapChainExtent = chooseSwapExtent(surfaceCapabilities, window);
 		uint32_t minImageCount = chooseSwapMinImageCount(surfaceCapabilities);
+		swapChainMinImageCount = minImageCount;
 
 		std::vector<vk::SurfaceFormatKHR> availableFormats = pd.getSurfaceFormatsKHR(*surface);
 		swapChainSurfaceFormat = chooseSwapSurfaceFormat(availableFormats);
