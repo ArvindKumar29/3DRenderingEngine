@@ -6,6 +6,8 @@ A real-time 3D renderer written from scratch in C++20 and Vulkan 1.3/1.4 (`vulka
   <img src="Results/First%20Triangle.png" alt="First Triangle Rendered in Vulkan 1.3" width="45%" />
   \&nbsp;\&nbsp;
   <img src="Results/Rectangle%20rendered%20using%20vertex%20input%20data.png" alt="Rectangle Rendered Using Vertex \& Index Buffers" width="45%" />
+\&nbsp;\&nbsp;
+<img src="Results/Camera%20and%20UI.png" alt=Camera and UI" width="45%" />
 </p>
 
 ## Status
