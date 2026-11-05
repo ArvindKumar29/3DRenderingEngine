@@ -24,5 +24,5 @@
 ## Results
 
 | Date | Milestone | Scene | Median frame time (ms) | 1% low (ms) | Notes |
-
+| --- | --- | --- | --- | --- | --- |
 | 5/11/2026 | 2 | A rectangle rendered with Camer and UI | 287(FPS) | - | NIL |
