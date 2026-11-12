@@ -80,7 +80,7 @@ namespace VKRENDERER
 		ImGui_ImplVulkan_Init(&initInfoVulkan);
 	}
 
-	void UI::renderFrame(Camera& camera)
+	void UI::renderFrame(Camera& camera, vk::DescriptorSet& depthTextureID)
 	{
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -90,6 +90,9 @@ namespace VKRENDERER
 		ImGui::Text("Rendering Engine Debug Menu");
 		ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 		ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+		ImGui::Separator();
+		ImGui::Text("Depth Texture ID: %p", static_cast<void*>(depthTextureID.operator VkDescriptorSet()));
+		ImGui::Image((ImTextureID)static_cast<VkDescriptorSet>(depthTextureID), ImVec2(300, 300), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 		ImGui::End();
 		ImGui::Render();
 	}

@@ -19,7 +19,7 @@ namespace VKRENDERER
 		UI();
 		~UI();
 		void init(Window& window, Device& device, vk::raii::Instance& instance);
-		void renderFrame(Camera& camera);
+		void renderFrame(Camera& camera, vk::DescriptorSet& depthTextureID);
 
 		vk::raii::DescriptorPool pool = nullptr;
 	private:

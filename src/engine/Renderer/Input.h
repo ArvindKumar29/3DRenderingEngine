@@ -13,6 +13,7 @@ namespace VKRENDERER
 		bool isKeyHeld(int keycode) ;
 		bool isMouseButtonDown(int button) ;
 		bool isMouseButtonHeld(int button) ;
+		void resetMousePosition();
 
 		void updateKeyStates();
 

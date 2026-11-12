@@ -15,7 +15,7 @@ namespace VKRENDERER
 	public:
 		Pipeline();
 		~Pipeline();
-		void createGraphicsPipeline(vk::raii::Device& ld, vk::Format surfaceFormat);
+		void createGraphicsPipeline(vk::raii::Device& ld, vk::Format surfaceFormat, vk::Format depthFormat);
 		std::vector<char> readFile(const std::string& fileName);
 		void createSyncObjects(vk::raii::Device& ld);
 

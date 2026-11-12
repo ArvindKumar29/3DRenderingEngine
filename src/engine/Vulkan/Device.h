@@ -16,6 +16,7 @@ namespace VKRENDERER
 
 		void getPhysicalDevice(vk::raii::Instance& instance, vk::raii::SurfaceKHR& surface, std::vector<char const*> requiredDeviceExtensions);
 		void createLogicalDevice(std::vector<char const*> requiredDeviceExtensions);
+		uint32_t findMemoryType(vk::raii::PhysicalDevice& pd, uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 		
 		vk::raii::PhysicalDevice physicalDevice = nullptr;
 		vk::raii::Device		 logicalDevice = nullptr;

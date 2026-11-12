@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "Device.h"
 #include <vulkan/vulkan_raii.hpp>
+#include <imgui_impl_vulkan.h>
 #include <glm/glm.hpp>
 #include "Pipeline.h"
 #include "CommandPool.h"
@@ -37,6 +38,7 @@ namespace VKRENDERER
 		vk::raii::Pipeline* m_GraphicsPipeline = nullptr;
 		vk::raii::CommandPool* m_cmdPool = nullptr;
 		vk::raii::CommandBuffer* m_cmdBuffer = nullptr;
+		vk::raii::Sampler depthSampler = nullptr;
 		Window window;
 		ValidationLayers validationLayers;
 		Instance vulkanInstance;
@@ -65,5 +67,7 @@ namespace VKRENDERER
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 			VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
 		};
+
+		vk::DescriptorSet depthTextureID = nullptr;
 	};
 }

@@ -7,6 +7,7 @@
 #include <GLFW/glfw3native.h>
 #include <vulkan/vulkan_raii.hpp>
 #include <spdlog/spdlog.h>
+#include "Device.h"
 
 namespace VKRENDERER
 {
@@ -27,14 +28,16 @@ namespace VKRENDERER
 		void initSurface(vk::raii::Instance& instance, GLFWwindow* window);
 		void createSwapChain(vk::raii::PhysicalDevice& pd, vk::raii::Device& ld);
 		void createImageViews(vk::raii::Device& ld);
-		void transitionImageLayout(vk::raii::CommandBuffer& cmdBuffer,
-								   uint32_t				   imageIndex,
-								   vk::ImageLayout         old_layout,
-								   vk::ImageLayout         new_layout,
-								   vk::AccessFlags2        src_access_mask,
-								   vk::AccessFlags2        dst_access_mask,
-								   vk::PipelineStageFlags2 src_stage_mask,
-								   vk::PipelineStageFlags2 dst_stage_mask);
+		void createDepthResources(Device& device);
+		void transitionImageLayout(vk::raii::CommandBuffer& cmdBuffer, 
+			vk::Image image, 
+			vk::ImageLayout oldLayout, 
+			vk::ImageLayout newLayout, 
+			vk::AccessFlags2 srcAccess, 
+			vk::AccessFlags2 dstAccess, 
+			vk::PipelineStageFlags2 srcStage, 
+			vk::PipelineStageFlags2 dstStage, 
+			vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor);
 	
 		GLFWwindow* window;
 		vk::raii::SurfaceKHR surface = nullptr;
@@ -44,5 +47,12 @@ namespace VKRENDERER
 		std::vector<vk::raii::ImageView> swapChainImageViews;
 		vk::Extent2D                     swapChainExtent;
 		std::vector<vk::Image>           swapChainImages;
+
+		// Depth Format
+		vk::Format depthFormat;
+		vk::raii::Image depthImage = nullptr;
+		vk::raii::DeviceMemory depthImageMemory = nullptr;
+		vk::raii::ImageView depthImageView = nullptr;
+		vk::raii::ImageView depthSampleView = nullptr;
 	};
 }

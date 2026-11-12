@@ -26,7 +26,7 @@ namespace VKRENDERER
 		cmdBuffer = std::move(vk::raii::CommandBuffers(ld, allocInfo).front());
 	}
 
-	void CommandPool::recordCommandBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, vk::ImageView imageView, vk::Extent2D extent, vk::raii::Pipeline& pipeline, vk::raii::PipelineLayout& pipelineLayout, vertexBuffer& vertexBuffer, indexBuffer& indexBuffer, glm::mat4 view, glm::mat4 proj, glm::mat4 model)
+	void CommandPool::recordCommandBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, vk::ImageView imageView, vk::ImageView depthImageView, vk::Extent2D extent, vk::raii::Pipeline& pipeline, vk::raii::PipelineLayout& pipelineLayout, vertexBuffer& vertexBuffer, indexBuffer& indexBuffer, glm::mat4 view, glm::mat4 proj, glm::mat4 model)
 	{
 		
 		// Clear screen and set clear color
@@ -41,10 +41,18 @@ namespace VKRENDERER
 			.setStoreOp(vk::AttachmentStoreOp::eStore)
 			.setClearValue(clearColor);
 
+		vk::RenderingAttachmentInfo depthAttachment = vk::RenderingAttachmentInfo()
+			.setImageView(depthImageView)
+			.setImageLayout(vk::ImageLayout::eDepthAttachmentOptimal)
+			.setLoadOp(vk::AttachmentLoadOp::eClear)
+			.setStoreOp(vk::AttachmentStoreOp::eStore)
+			.setClearValue(vk::ClearValue().setDepthStencil(vk::ClearDepthStencilValue(1.0f, 0)));
+
 		vk::RenderingInfo renderingInfo = vk::RenderingInfo()
 			.setRenderArea(vk::Rect2D(vk::Offset2D(0, 0), extent))
 			.setLayerCount(1)
-			.setColorAttachments(colorAttachment);
+			.setColorAttachments(colorAttachment)
+			.setPDepthAttachment(&depthAttachment);
 
 		cmdBuffer.beginRendering(renderingInfo);
 		cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline);
@@ -67,7 +75,6 @@ namespace VKRENDERER
 		// Final draw command
 		//cmdBuffer.draw(static_cast<uint32_t>(vertexBuffer.VB.size()), 1, 0, 0);
 		cmdBuffer.drawIndexed(static_cast<uint32_t>(indexBuffer.IB.size()), 1, 0, 0, 0);
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmdBuffer);
 
 		cmdBuffer.endRendering();
 		//cmdBuffer.end();

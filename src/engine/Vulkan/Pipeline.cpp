@@ -14,7 +14,7 @@ namespace VKRENDERER
 		return vk::raii::ShaderModule(ld, shaderModuleCreateInfo);
 	}
 
-	void Pipeline::createGraphicsPipeline(vk::raii::Device& ld, vk::Format surfaceFormat)
+	void Pipeline::createGraphicsPipeline(vk::raii::Device& ld, vk::Format surfaceFormat, vk::Format depthFormat)
 	{
 		// reading spv files...
 		auto vertShaderCode = readFile("shaders/main.vert.spv");
@@ -62,9 +62,17 @@ namespace VKRENDERER
 			.setRasterizerDiscardEnable(vk::False)
 			.setPolygonMode(vk::PolygonMode::eFill)
 			.setLineWidth(1.0f)
-			.setCullMode(vk::CullModeFlagBits::eNone)
+			.setCullMode(vk::CullModeFlagBits::eBack)
 			.setFrontFace(vk::FrontFace::eClockwise)
 			.setDepthBiasEnable(vk::False);
+
+		// Depth Stencil
+		vk::PipelineDepthStencilStateCreateInfo depthStencilCreateInfo = vk::PipelineDepthStencilStateCreateInfo()
+			.setDepthTestEnable(vk::True)
+			.setDepthWriteEnable(vk::True)
+			.setDepthCompareOp(vk::CompareOp::eLess)
+			.setDepthBoundsTestEnable(vk::False)
+			.setStencilTestEnable(vk::False);
 
 		// MultiSampling
 		vk::PipelineMultisampleStateCreateInfo multisampleCreateInfo = vk::PipelineMultisampleStateCreateInfo()
@@ -93,7 +101,8 @@ namespace VKRENDERER
 
 		// Dynamic Rendering
 		vk::PipelineRenderingCreateInfo renderingCreateInfo = vk::PipelineRenderingCreateInfo()
-			.setColorAttachmentFormats(surfaceFormat);
+			.setColorAttachmentFormats(surfaceFormat)
+			.setDepthAttachmentFormat(depthFormat);
 		// Final Graphics Pipeline Creation
 		vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
 			.setPNext(&renderingCreateInfo)
@@ -102,6 +111,7 @@ namespace VKRENDERER
 			.setPInputAssemblyState(&inputAssemblyCreateInfo)
 			.setPViewportState(&viewPortStateCreateInfo)
 			.setPRasterizationState(&resterizerStateCreateInfo)
+			.setPDepthStencilState(&depthStencilCreateInfo)
 			.setPMultisampleState(&multisampleCreateInfo)
 			.setPColorBlendState(&colorBlendCreateInfo)
 			.setPDynamicState(&dynamicStateCreateInfo)
