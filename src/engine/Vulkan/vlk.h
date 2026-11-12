@@ -15,6 +15,7 @@
 #include "../Renderer/Camera.h"
 #include "../Renderer/UI.h"
 #include "../Time.h"
+#include "vma.h"
 
 namespace VKRENDERER
 {
@@ -69,5 +70,7 @@ namespace VKRENDERER
 		};
 
 		vk::DescriptorSet depthTextureID = nullptr;
+
+		VmaAllocator allocator = nullptr;
 	};
 }

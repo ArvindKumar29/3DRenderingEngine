@@ -157,35 +157,27 @@ namespace VKRENDERER
 		
 	}
 
-	void Window::createDepthResources(Device& device)
+	void Window::createDepthResources(Device& device, VmaAllocator allocator)
 	{
 		// Createing Depth Image
-		vk::ImageCreateInfo imageCreateInfo = vk::ImageCreateInfo()
-			.setImageType(vk::ImageType::e2D)
-			.setFormat(depthFormat)
-			.setExtent(vk::Extent3D(swapChainExtent.width, swapChainExtent.height, 1))
-			.setMipLevels(1)
-			.setArrayLayers(1)
-			.setSamples(vk::SampleCountFlagBits::e1)
-			.setTiling(vk::ImageTiling::eOptimal)
-			.setUsage(vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled)
-			.setSharingMode(vk::SharingMode::eExclusive)
-			.setInitialLayout(vk::ImageLayout::eUndefined);
+		VkImageCreateInfo imageInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+		imageInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageInfo.extent.width = swapChainExtent.width;
+		imageInfo.extent.height = swapChainExtent.height;
+		imageInfo.extent.depth = 1;
+		imageInfo.mipLevels = 1;
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = (VkFormat)depthFormat;
+		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		depthImage = vk::raii::Image(device.logicalDevice, imageCreateInfo);
+		VmaAllocationCreateInfo allocInfo = {};
+		allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE; // GPU ki sabse fast memory
 
-		auto memRequirements = depthImage.getMemoryRequirements();
-		
-		// Binding and allocating memory for depth image
-		auto memRequirement = depthImage.getMemoryRequirements();
-		uint32_t memoryTypeIndex = device.findMemoryType(device.physicalDevice, memRequirement.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
-
-		vk::MemoryAllocateInfo allocInfo = vk::MemoryAllocateInfo()
-			.setAllocationSize(memRequirement.size)
-			.setMemoryTypeIndex(memoryTypeIndex);
-
-		depthImageMemory = vk::raii::DeviceMemory(device.logicalDevice, allocInfo);
-		depthImage.bindMemory(*depthImageMemory, 0);
+		vmaCreateImage(allocator, &imageInfo, &allocInfo, &depthImage, &depthImageAllocation, nullptr);
 
 		// Creating Depth Image View
 		vk::ImageViewCreateInfo imageViewCreateInfo = vk::ImageViewCreateInfo()

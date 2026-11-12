@@ -8,6 +8,7 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <spdlog/spdlog.h>
 #include "Device.h"
+#include <vma/vk_mem_alloc.h>
 
 namespace VKRENDERER
 {
@@ -28,7 +29,7 @@ namespace VKRENDERER
 		void initSurface(vk::raii::Instance& instance, GLFWwindow* window);
 		void createSwapChain(vk::raii::PhysicalDevice& pd, vk::raii::Device& ld);
 		void createImageViews(vk::raii::Device& ld);
-		void createDepthResources(Device& device);
+		void createDepthResources(Device& device, VmaAllocator allocator);
 		void transitionImageLayout(vk::raii::CommandBuffer& cmdBuffer, 
 			vk::Image image, 
 			vk::ImageLayout oldLayout, 
@@ -50,9 +51,10 @@ namespace VKRENDERER
 
 		// Depth Format
 		vk::Format depthFormat;
-		vk::raii::Image depthImage = nullptr;
+		VkImage depthImage = nullptr;
 		vk::raii::DeviceMemory depthImageMemory = nullptr;
 		vk::raii::ImageView depthImageView = nullptr;
 		vk::raii::ImageView depthSampleView = nullptr;
+		VmaAllocation depthImageAllocation = nullptr;
 	};
 }

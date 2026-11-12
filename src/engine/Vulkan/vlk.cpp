@@ -10,6 +10,18 @@ namespace VKRENDERER
 	{
 		device.logicalDevice.waitIdle();
 
+		vb.destroy(allocator);
+		ib.destroy(allocator);
+
+		if (window.depthImage != VK_NULL_HANDLE) {
+			vmaDestroyImage(allocator, window.depthImage, window.depthImageAllocation);
+			window.depthImage = VK_NULL_HANDLE;
+		}
+
+		if (allocator != nullptr) {
+			vmaDestroyAllocator(allocator);
+			allocator = nullptr;
+		}
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -35,10 +47,10 @@ namespace VKRENDERER
 
 		depthSampler = nullptr;
 
-		vb.buffer = nullptr;
-		vb.bufferMemory = nullptr;
-		ib.buffer = nullptr;
-		ib.bufferMemory = nullptr;
+		//vb.buffer = nullptr;
+		//vb.bufferMemory = nullptr;
+		//ib.buffer = nullptr;
+		//ib.bufferMemory = nullptr;
 
 		device.graphicsQueue = nullptr;
 		device.logicalDevice = nullptr;
@@ -89,8 +101,25 @@ namespace VKRENDERER
 		window.createSwapChain(device.physicalDevice, device.logicalDevice);
 		m_SwapChain = &window.swapChain;
 
+		// Inititalizing VMA Allocator
+		VmaVulkanFunctions vmaVulkanFunctions = {};
+		vmaVulkanFunctions.vkGetInstanceProcAddr =
+			reinterpret_cast<PFN_vkGetInstanceProcAddr>(vulkanInstance.instance.getProcAddr("vkGetInstanceProcAddr"));
+		vmaVulkanFunctions.vkGetDeviceProcAddr =
+			reinterpret_cast<PFN_vkGetDeviceProcAddr>(vulkanInstance.instance.getProcAddr("vkGetDeviceProcAddr"));
+
+		VmaAllocatorCreateInfo allocatorInfo = {};
+		allocatorInfo.physicalDevice = *device.physicalDevice;
+		allocatorInfo.device = *device.logicalDevice;
+		allocatorInfo.instance = *vulkanInstance.instance;
+		allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_3;
+		allocatorInfo.pVulkanFunctions = &vmaVulkanFunctions;
+
+		vmaCreateAllocator(&allocatorInfo, &allocator);
+
+		// Creating Depth Resources
 		window.depthFormat = vk::Format::eD32Sfloat;
-		window.createDepthResources(device);
+		window.createDepthResources(device, allocator);
 
 		window.createImageViews(device.logicalDevice);
 
@@ -102,8 +131,8 @@ namespace VKRENDERER
 		m_cmdBuffer = &cmdPool.cmdBuffer;
 		m_cmdPool = &cmdPool.cmdPool;
 
-		vb.createVertexBuffer(device.logicalDevice, device.physicalDevice);
-		ib.createIndexBuffer(device.logicalDevice, device.physicalDevice);
+		vb.createVertexBuffer(device.logicalDevice, device.physicalDevice, allocator);
+		ib.createIndexBuffer(device.logicalDevice, device.physicalDevice, allocator);
 
 		vk::SamplerCreateInfo samplerInfo = vk::SamplerCreateInfo()
 			.setMagFilter(vk::Filter::eNearest)
@@ -200,7 +229,7 @@ namespace VKRENDERER
 			vk::PipelineStageFlagBits2::eColorAttachmentOutput,
 			vk::ImageAspectFlagBits::eColor);
 		
-		window.transitionImageLayout(cmdPool.cmdBuffer, *window.depthImage,
+		window.transitionImageLayout(cmdPool.cmdBuffer, static_cast<vk::Image>(window.depthImage),
 			vk::ImageLayout::eUndefined,
 			vk::ImageLayout::eDepthAttachmentOptimal,
 			vk::AccessFlags2(),
@@ -219,7 +248,7 @@ namespace VKRENDERER
 			vb, ib, camera.getViewMatrix(), 
 			camera.getProjectionMatrix(), modelMatrix);
 		
-		window.transitionImageLayout(cmdPool.cmdBuffer, *window.depthImage,
+		window.transitionImageLayout(cmdPool.cmdBuffer, static_cast<vk::Image>(window.depthImage),
 			vk::ImageLayout::eDepthAttachmentOptimal, 
 			vk::ImageLayout::eShaderReadOnlyOptimal,  
 			vk::AccessFlagBits2::eDepthStencilAttachmentWrite,

@@ -20,7 +20,7 @@ This is a plan, not a promise. The order of the tiers matters more than the date
 * \[x] Depth buffering
 * \[x] Free camera
 * \[x] ImGui debug UI
-* \[ ] GPU memory with VMA
+* \[x] GPU memory with VMA
 
 ## Milestone 3: assets (December)
 

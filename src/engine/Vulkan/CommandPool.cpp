@@ -64,8 +64,8 @@ namespace VKRENDERER
 		cmdBuffer.setScissor(0, scissor);
 		
 		// Binding vertex buffer
-		cmdBuffer.bindVertexBuffers(0, *vertexBuffer.buffer, { 0 });
-		cmdBuffer.bindIndexBuffer(*indexBuffer.buffer, 0, vk::IndexType::eUint32);
+		cmdBuffer.bindVertexBuffers(0, static_cast<vk::Buffer>(vertexBuffer.buffer), { 0 });
+		cmdBuffer.bindIndexBuffer(static_cast<vk::Buffer>(indexBuffer.buffer), 0, vk::IndexType::eUint32);
 
 		// Setting up push constants
 		cmdBuffer.pushConstants(*pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &view);
