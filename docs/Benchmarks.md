@@ -4,14 +4,14 @@
 
 | Component | Details |
 | --- | --- |
-| Laptop | ASUS TUF Dash F15 (TODO: exact model number) |
+| Laptop | ASUS TUF Dash F15  |
 | CPU | Intel Core i5-11300H (11th Gen), 4 cores / 8 threads, 3.1 GHz base, up to 4.4 GHz turbo (about 4.0 GHz observed at idle) |
 | CPU cache | L1 320 KB, L2 5.0 MB, L3 8.0 MB |
 | RAM | 16 GB DDR4-3200 (SODIMM, both slots used) |
 | GPU (used for all tests) | NVIDIA GeForce RTX 3050 Laptop GPU, 4 GB dedicated VRAM, driver 621.01 |
 | GPU (not used) | Intel Iris Xe Graphics (integrated) |
 | Storage | System NVMe SSD, SK hynix HFM512GD3JX013N, 512 GB (project on D:); second NVMe, Crucial P3 1 TB |
-| OS | Windows 11 (TODO: version and build from `winver`) |
+| OS | Windows 11 |
 | Vulkan | SDK 1.4.363, NVIDIA driver API version 1.4.357, validation layer 1.4.363 |
 | Display | TODO: resolution and refresh rate |
 
