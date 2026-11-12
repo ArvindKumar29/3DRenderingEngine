@@ -13,7 +13,7 @@
 | Storage | System NVMe SSD, SK hynix HFM512GD3JX013N, 512 GB (project on D:); second NVMe, Crucial P3 1 TB |
 | OS | Windows 11 |
 | Vulkan | SDK 1.4.363, NVIDIA driver API version 1.4.357, validation layer 1.4.363 |
-| Display | TODO: resolution and refresh rate |
+| Display | 1920x1080 @ 144hz refresh rate |
 
 ## Test conditions
 
