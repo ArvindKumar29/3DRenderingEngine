@@ -26,10 +26,10 @@ target_compile_features(engine PUBLIC cxx_std_20)
 target_link_libraries(engine PUBLIC
   glfw                             # Windowing and input
   glm::glm                         # 3D Math
-  volk::volk                       # Vulkan meta-loader
   spdlog::spdlog                   # Logging
   GPUOpen::VulkanMemoryAllocator   # Memory management
   imgui::imgui                     # GUI
+  Tracy::TracyClient               # Profiler
 )
 
 # 5. C++ PREPROCESSOR MACROS (#defines)

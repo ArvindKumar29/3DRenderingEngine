@@ -36,10 +36,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # downloads the source code, compiles the libraries, and links them automatically[cite: 3, 4].
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(volk CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 
 # STB is a header-only library (no compilation needed), so we just locate the folder containing the header.
 find_path(STB_INCLUDE_DIRS "stb_image.h")
@@ -66,6 +66,9 @@ add_shader_target(shaders ${CMAKE_SOURCE_DIR}/src/engine/Shaders ${CMAKE_SOURCE_
 add_subdirectory(src/engine) # Handles compiling your engine logic into a library (.lib).
 add_subdirectory(src/app)    # Handles compiling your actual game loop into an executable (.exe).
 target_compile_definitions(engine PUBLIC ENGINE_ROOT_DIR="${CMAKE_SOURCE_DIR}/")
+target_compile_definitions(engine PUBLIC
+  IMGUI_IMPL_VULKAN_USE_VOLK
+  IMGUI_IMPL_VULKAN_HAS_DYNAMIC_RENDERING)
 
 # ==============================================================================
 # 6. IDE QUALITY OF LIFE

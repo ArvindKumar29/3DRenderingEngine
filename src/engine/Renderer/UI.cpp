@@ -2,10 +2,10 @@
 
 namespace VKRENDERER
 {
-	UI::UI() 
+	UI::UI()
 	{}
-	
-	UI::~UI() 
+
+	UI::~UI()
 	{}
 
 	void UI::init(Window& window, Device& device, vk::raii::Instance& instance)
@@ -39,26 +39,25 @@ namespace VKRENDERER
 
 		// Initialize ImGui Vulkan backend
 		ImGui_ImplVulkan_InitInfo initInfoVulkan = {};
-		// Match the API version passed to VkApplicationInfo in Instance.cpp.
 		initInfoVulkan.ApiVersion = VK_API_VERSION_1_4;
-		initInfoVulkan.Instance = *instance;
-		initInfoVulkan.PhysicalDevice = *device.physicalDevice;
-		initInfoVulkan.Device = *device.logicalDevice;
+		initInfoVulkan.Instance = static_cast<VkInstance>(*instance);
+		initInfoVulkan.PhysicalDevice = static_cast<VkPhysicalDevice>(*device.physicalDevice);
+		initInfoVulkan.Device = static_cast<VkDevice>(*device.logicalDevice);
 		initInfoVulkan.QueueFamily = device.graphicsQueueIndex;
-		initInfoVulkan.Queue = *device.graphicsQueue;
+		initInfoVulkan.Queue = static_cast<VkQueue>(*device.graphicsQueue);
 		initInfoVulkan.PipelineCache = VK_NULL_HANDLE;
 		initInfoVulkan.DescriptorPool = *pool;
+
 		const uint32_t swapChainImageCount = static_cast<uint32_t>(window.swapChainImages.size());
 		if (swapChainImageCount < 2)
 			throw std::runtime_error("ImGui Vulkan backend requires at least two swapchain images");
 		initInfoVulkan.MinImageCount = window.swapChainMinImageCount;
 		initInfoVulkan.ImageCount = swapChainImageCount;
 
-		// DYNAMIC RENDERING - Store format in class member for lifetime guarantees
+		// DYNAMIC RENDERING
 		initInfoVulkan.UseDynamicRendering = true;
 		colorAttachmentFormat = static_cast<VkFormat>(window.swapChainSurfaceFormat.format);
 
-		// Prepare pipeline info with persistent member variable
 		pipelineInfo = {};
 		pipelineInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		pipelineInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
@@ -69,15 +68,10 @@ namespace VKRENDERER
 
 		initInfoVulkan.PipelineInfoMain = pipelineInfo;
 
-		ImGui_ImplVulkan_LoadFunctions(
-			VK_API_VERSION_1_3,
-			[](const char* function_name, void* user_data) -> PFN_vkVoidFunction {
-				return static_cast<vk::Instance*>(user_data)->getProcAddr(function_name);
-			},
-			(*instance) // Passes vk::Instance* as user_data
-		);
-
-		ImGui_ImplVulkan_Init(&initInfoVulkan);
+		if (!ImGui_ImplVulkan_Init(&initInfoVulkan))
+		{
+			throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
+		}
 	}
 
 	void UI::renderFrame(Camera& camera, vk::DescriptorSet& depthTextureID)

@@ -1,14 +1,22 @@
 #pragma once
-#include "Instance.h"
+
+//#define VK_NO_PROTOTYPES
+#include <vulkan/vulkan.h>
+
 #include "ValidationLayers.h"
-#include "Window.h"
-#include "Device.h"
 #include <vulkan/vulkan_raii.hpp>
 #include <imgui_impl_vulkan.h>
 #include <glm/glm.hpp>
+#include <spdlog/spdlog.h>
+//#include <volk.h>
+#define TRACY_VK_USE_SYMBOL_TABLE
+#include <tracy/TracyVulkan.hpp>
+
+#include "Instance.h"
+#include "Window.h"
+#include "Device.h"
 #include "Pipeline.h"
 #include "CommandPool.h"
-#include <spdlog/spdlog.h>
 #include "../Renderer/Buffers.h"
 #include "../Renderer/Input.h"
 #include "../Renderer/Vertex.h"
@@ -72,5 +80,6 @@ namespace VKRENDERER
 		vk::DescriptorSet depthTextureID = nullptr;
 
 		VmaAllocator allocator = nullptr;
+		TracyVkCtx tracyContext = nullptr;
 	};
 }

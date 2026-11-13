@@ -27,7 +27,7 @@ This is a plan, not a promise. The order of the tiers matters more than the date
 * \[ ] Textures with stb\_image
 * \[ ] glTF static meshes with fastgltf
 * \[ ] Descriptor indexing (bindless textures)
-* \[ ] CPU and GPU profiling zones with Tracy
+* \[x] CPU and GPU profiling zones with Tracy
 
 ## Foundation (January to February)
 

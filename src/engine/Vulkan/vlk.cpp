@@ -1,4 +1,5 @@
 #include "vlk.h"
+#include <tracy/Tracy.hpp>
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace VKRENDERER
@@ -8,6 +9,7 @@ namespace VKRENDERER
 	
 	vlk::~vlk()
 	{
+		ZoneScoped;
 		device.logicalDevice.waitIdle();
 
 		vb.destroy(allocator);
@@ -16,6 +18,11 @@ namespace VKRENDERER
 		if (window.depthImage != VK_NULL_HANDLE) {
 			vmaDestroyImage(allocator, window.depthImage, window.depthImageAllocation);
 			window.depthImage = VK_NULL_HANDLE;
+		}
+
+		if (tracyContext != nullptr) {
+			TracyVkDestroy(tracyContext);
+			tracyContext = nullptr;
 		}
 
 		if (allocator != nullptr) {
@@ -71,6 +78,7 @@ namespace VKRENDERER
 
 	void vlk::init()
 	{
+		ZoneScoped;
 		// Creating Window
 		uint32_t width = 1920, height = 1080;
 		const char* title = "Rendering Engine";
@@ -131,6 +139,21 @@ namespace VKRENDERER
 		m_cmdBuffer = &cmdPool.cmdBuffer;
 		m_cmdPool = &cmdPool.cmdPool;
 
+
+		// volk inititialization and tracy initialization
+		//volkInitialize();
+		//volkLoadInstance(*vulkanInstance.instance);
+		//volkLoadDevice(*device.logicalDevice);
+		tracyContext = TracyVkContext(
+			*vulkanInstance.instance,
+			*device.physicalDevice,
+			*device.logicalDevice,
+			*device.graphicsQueue,
+			*cmdPool.cmdBuffer,
+			vmaVulkanFunctions.vkGetInstanceProcAddr,
+			vmaVulkanFunctions.vkGetDeviceProcAddr
+		);
+
 		vb.createVertexBuffer(device.logicalDevice, device.physicalDevice, allocator);
 		ib.createIndexBuffer(device.logicalDevice, device.physicalDevice, allocator);
 
@@ -152,6 +175,7 @@ namespace VKRENDERER
 
 	void vlk::run()
 	{
+		ZoneScoped;
 		init();
 		time.updateDeltaTime();
 		float dt = time.getDeltaTime();
@@ -198,6 +222,8 @@ namespace VKRENDERER
 			}
 			camera.update();
 			renderFrame();
+
+			FrameMark;
 		}
 
 		device.logicalDevice.waitIdle();
@@ -208,6 +234,7 @@ namespace VKRENDERER
 
 	void vlk::renderFrame()
 	{
+		ZoneScoped;
 		device.logicalDevice.waitForFences(*pipeline.renderFence, vk::True, UINT64_MAX);
 
 		auto [result, imageIndex] = window.swapChain.acquireNextImage(UINT64_MAX, *pipeline.imageAvailableSemaphores, nullptr);
@@ -217,61 +244,66 @@ namespace VKRENDERER
 		cmdPool.cmdBuffer.reset();
 		vk::CommandBufferBeginInfo beginInfo{};
 		cmdPool.cmdBuffer.begin(beginInfo);
-
-		// Transitioning image layout for swapchain image and depth image
-		window.transitionImageLayout(cmdPool.cmdBuffer, 
-			window.swapChainImages[imageIndex], 
-			vk::ImageLayout::eUndefined, 
-			vk::ImageLayout::eAttachmentOptimal, 
-			vk::AccessFlags2(), 
-			vk::AccessFlagBits2::eColorAttachmentWrite, 
-			vk::PipelineStageFlagBits2::eTopOfPipe, 
-			vk::PipelineStageFlagBits2::eColorAttachmentOutput,
-			vk::ImageAspectFlagBits::eColor);
+		TracyVkCollect(tracyContext, *cmdPool.cmdBuffer);
 		
-		window.transitionImageLayout(cmdPool.cmdBuffer, static_cast<vk::Image>(window.depthImage),
-			vk::ImageLayout::eUndefined,
-			vk::ImageLayout::eDepthAttachmentOptimal,
-			vk::AccessFlags2(),
-			vk::AccessFlagBits2::eDepthStencilAttachmentWrite | vk::AccessFlagBits2::eDepthStencilAttachmentRead,
-			vk::PipelineStageFlagBits2::eTopOfPipe,
-			vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-			vk::ImageAspectFlagBits::eDepth);
-		
-		cmdPool.recordCommandBuffer(device.logicalDevice, 
-			device.physicalDevice, 
-			window.swapChainImageViews[imageIndex], 
-			window.depthImageView, 
-			window.swapChainExtent, 
-			pipeline.graphicsPipeline, 
-			pipeline.graphicsPipeLineLayout, 
-			vb, ib, camera.getViewMatrix(), 
-			camera.getProjectionMatrix(), modelMatrix);
-		
-		window.transitionImageLayout(cmdPool.cmdBuffer, static_cast<vk::Image>(window.depthImage),
-			vk::ImageLayout::eDepthAttachmentOptimal, 
-			vk::ImageLayout::eShaderReadOnlyOptimal,  
-			vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-			vk::AccessFlagBits2::eShaderRead,
-			vk::PipelineStageFlagBits2::eLateFragmentTests,
-			vk::PipelineStageFlagBits2::eFragmentShader,
-			vk::ImageAspectFlagBits::eDepth);
+		{
+			TracyVkZone(tracyContext, *cmdPool.cmdBuffer, "Main GPU Render Pass");
 
-		// UI Rendering
-		vk::RenderingAttachmentInfo uiColorAttachment = vk::RenderingAttachmentInfo()
-			.setImageView(*window.swapChainImageViews[imageIndex])
-			.setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
-			.setLoadOp(vk::AttachmentLoadOp::eLoad) 
-			.setStoreOp(vk::AttachmentStoreOp::eStore);
+			// Transitioning image layout for swapchain image and depth image
+			window.transitionImageLayout(cmdPool.cmdBuffer,
+				window.swapChainImages[imageIndex],
+				vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eAttachmentOptimal,
+				vk::AccessFlags2(),
+				vk::AccessFlagBits2::eColorAttachmentWrite,
+				vk::PipelineStageFlagBits2::eTopOfPipe,
+				vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+				vk::ImageAspectFlagBits::eColor);
 
-		vk::RenderingInfo uiRenderingInfo = vk::RenderingInfo()
-			.setRenderArea(vk::Rect2D(vk::Offset2D(0, 0), window.swapChainExtent))
-			.setLayerCount(1)
-			.setColorAttachments(uiColorAttachment);
+			window.transitionImageLayout(cmdPool.cmdBuffer, static_cast<vk::Image>(window.depthImage),
+				vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eDepthAttachmentOptimal,
+				vk::AccessFlags2(),
+				vk::AccessFlagBits2::eDepthStencilAttachmentWrite | vk::AccessFlagBits2::eDepthStencilAttachmentRead,
+				vk::PipelineStageFlagBits2::eTopOfPipe,
+				vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
+				vk::ImageAspectFlagBits::eDepth);
 
-		cmdPool.cmdBuffer.beginRendering(uiRenderingInfo);
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmdPool.cmdBuffer);
-		cmdPool.cmdBuffer.endRendering();
+			cmdPool.recordCommandBuffer(device.logicalDevice,
+				device.physicalDevice,
+				window.swapChainImageViews[imageIndex],
+				window.depthImageView,
+				window.swapChainExtent,
+				pipeline.graphicsPipeline,
+				pipeline.graphicsPipeLineLayout,
+				vb, ib, camera.getViewMatrix(),
+				camera.getProjectionMatrix(), modelMatrix);
+
+			window.transitionImageLayout(cmdPool.cmdBuffer, static_cast<vk::Image>(window.depthImage),
+				vk::ImageLayout::eDepthAttachmentOptimal,
+				vk::ImageLayout::eShaderReadOnlyOptimal,
+				vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
+				vk::AccessFlagBits2::eShaderRead,
+				vk::PipelineStageFlagBits2::eLateFragmentTests,
+				vk::PipelineStageFlagBits2::eFragmentShader,
+				vk::ImageAspectFlagBits::eDepth);
+
+			// UI Rendering
+			vk::RenderingAttachmentInfo uiColorAttachment = vk::RenderingAttachmentInfo()
+				.setImageView(*window.swapChainImageViews[imageIndex])
+				.setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
+				.setLoadOp(vk::AttachmentLoadOp::eLoad)
+				.setStoreOp(vk::AttachmentStoreOp::eStore);
+
+			vk::RenderingInfo uiRenderingInfo = vk::RenderingInfo()
+				.setRenderArea(vk::Rect2D(vk::Offset2D(0, 0), window.swapChainExtent))
+				.setLayerCount(1)
+				.setColorAttachments(uiColorAttachment);
+
+			cmdPool.cmdBuffer.beginRendering(uiRenderingInfo);
+			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmdPool.cmdBuffer);
+			cmdPool.cmdBuffer.endRendering();
+		}
 
 		window.transitionImageLayout(cmdPool.cmdBuffer, window.swapChainImages[imageIndex],
 			vk::ImageLayout::eColorAttachmentOptimal,

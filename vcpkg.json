@@ -8,6 +8,7 @@
     "spdlog",
     "vulkan-memory-allocator",
     "stb",
+    "tracy",
     {
       "name": "imgui",
       "features": [
