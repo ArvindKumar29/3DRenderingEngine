@@ -40,6 +40,7 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
+find_package(Stb REQUIRED)
 
 # STB is a header-only library (no compilation needed), so we just locate the folder containing the header.
 find_path(STB_INCLUDE_DIRS "stb_image.h")
