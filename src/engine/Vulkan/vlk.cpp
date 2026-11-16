@@ -12,6 +12,16 @@ namespace VKRENDERER
 		ZoneScoped;
 		device.logicalDevice.waitIdle();
 
+		descriptorSet = nullptr;
+		descriptorPool = nullptr;
+
+		texture.imageView = nullptr;
+		texture.sampler = nullptr;
+		if (texture.image != VK_NULL_HANDLE) {
+			vmaDestroyImage(allocator, texture.image, texture.allocation);
+			texture.image = VK_NULL_HANDLE;
+		}
+
 		vb.destroy(allocator);
 		ib.destroy(allocator);
 
@@ -43,6 +53,7 @@ namespace VKRENDERER
 
 		pipeline.graphicsPipeline = nullptr;
 		pipeline.graphicsPipeLineLayout = nullptr;
+		pipeline.descriptorSetLayout = nullptr;
 
 		window.swapChainImageViews.clear();
 		window.swapChain = nullptr;
@@ -141,9 +152,6 @@ namespace VKRENDERER
 
 
 		// volk inititialization and tracy initialization
-		//volkInitialize();
-		//volkLoadInstance(*vulkanInstance.instance);
-		//volkLoadDevice(*device.logicalDevice);
 		tracyContext = TracyVkContext(
 			*vulkanInstance.instance,
 			*device.physicalDevice,
@@ -170,6 +178,40 @@ namespace VKRENDERER
 		ui.init(window, device, vulkanInstance.instance);
 
 		depthTextureID = ImGui_ImplVulkan_AddTexture(*depthSampler, *window.depthSampleView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		texture.loadFromFile("assets/image.png", device, cmdPool.cmdBuffer, window, allocator);
+
+		vk::DescriptorPoolSize desciprtorPoolSize = vk::DescriptorPoolSize()
+			.setType(vk::DescriptorType::eCombinedImageSampler)
+			.setDescriptorCount(1);
+		vk::DescriptorPoolCreateInfo poolCreateInfo = vk::DescriptorPoolCreateInfo()
+			.setMaxSets(1)
+			.setPoolSizeCount(1)
+			.setPPoolSizes(&desciprtorPoolSize);
+		descriptorPool = device.logicalDevice.createDescriptorPool(poolCreateInfo);
+
+		vk::DescriptorSetAllocateInfo descriptorSetAllocateInfo = vk::DescriptorSetAllocateInfo()
+			.setDescriptorSetCount(1)
+			.setPSetLayouts(&*pipeline.descriptorSetLayout)
+			.setDescriptorPool(descriptorPool);
+
+		auto descriptorSets = device.logicalDevice.allocateDescriptorSets(descriptorSetAllocateInfo);
+		descriptorSet = std::move(descriptorSets.front());
+
+		vk::DescriptorImageInfo imageInfo = vk::DescriptorImageInfo()
+			.setSampler(*texture.sampler)      
+			.setImageView(*texture.imageView)  
+			.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+
+		vk::WriteDescriptorSet writeSet = vk::WriteDescriptorSet()
+			.setDstSet(*descriptorSet)
+			.setDstBinding(0)
+			.setDstArrayElement(0)
+			.setDescriptorCount(1)
+			.setPImageInfo(&imageInfo)
+			.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+		device.logicalDevice.updateDescriptorSets(writeSet, nullptr);
+
 	}
 
 
@@ -274,9 +316,8 @@ namespace VKRENDERER
 				window.swapChainImageViews[imageIndex],
 				window.depthImageView,
 				window.swapChainExtent,
-				pipeline.graphicsPipeline,
-				pipeline.graphicsPipeLineLayout,
-				vb, ib, camera.getViewMatrix(),
+				pipeline,
+				vb, ib, descriptorSet, camera.getViewMatrix(),
 				camera.getProjectionMatrix(), modelMatrix);
 
 			window.transitionImageLayout(cmdPool.cmdBuffer, static_cast<vk::Image>(window.depthImage),

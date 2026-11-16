@@ -21,6 +21,7 @@
 #include "../Renderer/Input.h"
 #include "../Renderer/Vertex.h"
 #include "../Renderer/Camera.h"
+#include "../Renderer/Texture.h"
 #include "../Renderer/UI.h"
 #include "../Time.h"
 #include "vma.h"
@@ -47,7 +48,10 @@ namespace VKRENDERER
 		vk::raii::Pipeline* m_GraphicsPipeline = nullptr;
 		vk::raii::CommandPool* m_cmdPool = nullptr;
 		vk::raii::CommandBuffer* m_cmdBuffer = nullptr;
+		vk::raii::DescriptorPool descriptorPool = nullptr;
+		vk::raii::DescriptorSet descriptorSet = nullptr;
 		vk::raii::Sampler depthSampler = nullptr;
+		vk::raii::Sampler imageSampler = nullptr;
 		Window window;
 		ValidationLayers validationLayers;
 		Instance vulkanInstance;
@@ -60,6 +64,7 @@ namespace VKRENDERER
 		CommandPool cmdPool;
 		Input inputSystem;
 		Camera camera;
+		Texture texture;
 		Time time;
 		UI ui;
 

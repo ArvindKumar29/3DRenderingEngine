@@ -47,6 +47,18 @@ namespace VKRENDERER
 			.setTopology(vk::PrimitiveTopology::eTriangleList)
 			.setPrimitiveRestartEnable(vk::False);
 
+		// Descriptor set layout for textures
+		vk::DescriptorSetLayoutBinding layoutBinding{};
+		layoutBinding.binding = 0;
+		layoutBinding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+		layoutBinding.descriptorCount = 1;
+		layoutBinding.stageFlags = vk::ShaderStageFlagBits::eFragment;
+		layoutBinding.pImmutableSamplers = nullptr;
+
+		vk::DescriptorSetLayoutCreateInfo layoutCreateInfo = vk::DescriptorSetLayoutCreateInfo()
+			.setBindings(layoutBinding)
+			.setBindingCount(1);
+		descriptorSetLayout = ld.createDescriptorSetLayout(layoutCreateInfo);
 
 		// Dynamic viewport and Scissors
 		std::vector<vk::DynamicState> dynamicState = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -95,9 +107,11 @@ namespace VKRENDERER
 			.setOffset(0)
 			.setSize(sizeof(glm::mat4) * 3);
 
-		vk::PipelineLayoutCreateInfo layoutCreateInfo = vk::PipelineLayoutCreateInfo()
-			.setPushConstantRanges(pushConstantRange);
-		graphicsPipeLineLayout = vk::raii::PipelineLayout(ld, layoutCreateInfo);
+		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
+			.setPushConstantRanges(pushConstantRange)
+			.setSetLayouts(*descriptorSetLayout);
+
+		graphicsPipeLineLayout = vk::raii::PipelineLayout(ld, pipelineLayoutCreateInfo);
 
 		// Dynamic Rendering
 		vk::PipelineRenderingCreateInfo renderingCreateInfo = vk::PipelineRenderingCreateInfo()

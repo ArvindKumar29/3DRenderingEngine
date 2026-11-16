@@ -26,7 +26,7 @@ namespace VKRENDERER
 		cmdBuffer = std::move(vk::raii::CommandBuffers(ld, allocInfo).front());
 	}
 
-	void CommandPool::recordCommandBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, vk::ImageView imageView, vk::ImageView depthImageView, vk::Extent2D extent, vk::raii::Pipeline& pipeline, vk::raii::PipelineLayout& pipelineLayout, vertexBuffer& vertexBuffer, indexBuffer& indexBuffer, glm::mat4 view, glm::mat4 proj, glm::mat4 model)
+	void CommandPool::recordCommandBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, vk::ImageView imageView, vk::ImageView depthImageView, vk::Extent2D extent, Pipeline& pipeline, vertexBuffer& vertexBuffer, indexBuffer& indexBuffer, vk::raii::DescriptorSet& descriptorSet, glm::mat4 view, glm::mat4 proj, glm::mat4 model)
 	{
 		
 		// Clear screen and set clear color
@@ -55,7 +55,7 @@ namespace VKRENDERER
 			.setPDepthAttachment(&depthAttachment);
 
 		cmdBuffer.beginRendering(renderingInfo);
-		cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline);
+		cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline.graphicsPipeline);
 	
 		// Setting viewport and Scissors
 		vk::Viewport viewport(0.0f, 0.0f, static_cast<float>(extent.width), static_cast<float>(extent.height), 0.0f, 1.0f);
@@ -67,10 +67,18 @@ namespace VKRENDERER
 		cmdBuffer.bindVertexBuffers(0, static_cast<vk::Buffer>(vertexBuffer.buffer), { 0 });
 		cmdBuffer.bindIndexBuffer(static_cast<vk::Buffer>(indexBuffer.buffer), 0, vk::IndexType::eUint32);
 
+		// Binding Descriptor set 
+		cmdBuffer.bindDescriptorSets(
+			vk::PipelineBindPoint::eGraphics,
+			pipeline.graphicsPipeLineLayout, // Tera pipeline layout
+			0,                               // First set (set = 0)
+			*descriptorSet,                  // Tera updated set
+			nullptr                          // Dynamic offsets (humare paas nahi hain)
+		);
 		// Setting up push constants
-		cmdBuffer.pushConstants(*pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &view);
-		cmdBuffer.pushConstants(*pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4), sizeof(glm::mat4), &proj);
-		cmdBuffer.pushConstants(*pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4) * 2, sizeof(glm::mat4), &model);
+		cmdBuffer.pushConstants(*pipeline.graphicsPipeLineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &view);
+		cmdBuffer.pushConstants(*pipeline.graphicsPipeLineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4), sizeof(glm::mat4), &proj);
+		cmdBuffer.pushConstants(*pipeline.graphicsPipeLineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4) * 2, sizeof(glm::mat4), &model);
 
 		// Final draw command
 		//cmdBuffer.draw(static_cast<uint32_t>(vertexBuffer.VB.size()), 1, 0, 0);

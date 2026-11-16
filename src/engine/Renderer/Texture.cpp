@@ -61,6 +61,20 @@ namespace VKRENDERER
 
 		imageView = vk::raii::ImageView(device.logicalDevice, imageViewCreateInfo);
 
+		// Sampler
+		vk::SamplerCreateInfo samplerInfo = vk::SamplerCreateInfo()
+			.setMagFilter(vk::Filter::eLinear)
+			.setMinFilter(vk::Filter::eLinear)
+			.setAddressModeU(vk::SamplerAddressMode::eRepeat)
+			.setAddressModeV(vk::SamplerAddressMode::eRepeat)
+			.setAddressModeW(vk::SamplerAddressMode::eRepeat)
+			.setAnisotropyEnable(vk::False)
+			.setBorderColor(vk::BorderColor::eIntOpaqueBlack)
+			.setUnnormalizedCoordinates(vk::False)
+			.setCompareEnable(vk::False)
+			.setMipmapMode(vk::SamplerMipmapMode::eLinear);
+
+		sampler = device.logicalDevice.createSampler(samplerInfo);
 
 		vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo()
 			.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);

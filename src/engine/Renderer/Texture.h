@@ -22,11 +22,10 @@ namespace VKRENDERER
 		uint32_t imageSize = 0;                 
 		unsigned char* pixels = nullptr;
 
-
-	private:
-		VkImage image = VK_NULL_HANDLE;
-		VmaAllocation allocation = VK_NULL_HANDLE;
-		vk::raii::ImageView imageView = VK_NULL_HANDLE;
+		VkImage image = nullptr;
+		VmaAllocation allocation = nullptr;
+		vk::raii::ImageView imageView = nullptr;
+		vk::raii::Sampler sampler = nullptr;
 
 	};
 }

@@ -7,6 +7,7 @@ namespace VKRENDERER
 	struct Vertex {
 		glm::vec3 pos;
 		glm::vec3 color;
+		glm::vec2 texCoord;
 
 		static vk::VertexInputBindingDescription getBindingDescription()
 		{
@@ -17,9 +18,9 @@ namespace VKRENDERER
 			return inputBindingDescription;
 		}
 
-		static std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescription()
+		static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescription()
 		{
-			std::array<vk::VertexInputAttributeDescription, 2> inputAttributeDescription{};
+			std::array<vk::VertexInputAttributeDescription, 3> inputAttributeDescription{};
 			inputAttributeDescription[0] = vk::VertexInputAttributeDescription()
 				.setBinding(0)
 				.setLocation(0)
@@ -30,6 +31,11 @@ namespace VKRENDERER
 				.setLocation(1)
 				.setFormat(vk::Format::eR32G32B32Sfloat)
 				.setOffset(offsetof(Vertex, color));
+			inputAttributeDescription[2] = vk::VertexInputAttributeDescription()
+				.setBinding(0)
+				.setOffset(offsetof(Vertex, texCoord))
+				.setLocation(2)
+				.setFormat(vk::Format::eR32G32Sfloat);
 			return inputAttributeDescription;
 		}
 	};

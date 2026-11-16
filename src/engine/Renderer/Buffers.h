@@ -13,16 +13,16 @@ namespace VKRENDERER
 		// Yahan function signature mein VmaAllocator paas kar
 		void createVertexBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, VmaAllocator allocator) {
 			VB = {
-				{ { -0.5f,  0.5f,  0.5f },{ 0.0f, 0.0f, 1.0f } },	// 0: Bottom-Left-Front  (Blue)
-				{ { 0.5f,  0.5f,  0.5f },{ 1.0f, 0.0f, 1.0f } },	// 1: Bottom-Right-Front (Magenta)
-				{ { -0.5f, -0.5f,  0.5f },{ 0.0f, 1.0f, 1.0f } },	// 2: Top-Left-Front     (Cyan)
-				{ { 0.5f, -0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f } },	// 3: Top-Right-Front    (White)
+				{ { -0.5f,  0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f },{ 1.0f, 0.0f } },	// 0: Bottom-Left-Front  (Blue)
+				{ { 0.5f,  0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },	// 1: Bottom-Right-Front (Magenta)
+				{ { -0.5f, -0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 0.0f } },	// 2: Top-Left-Front     (Cyan)
+				{ { 0.5f, -0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },	// 3: Top-Right-Front    (White)
 
 				// BACK FACE (Z = -0.5)
-				{ { -0.5f,  0.5f, -0.5f },{ 0.0f, 0.0f, 0.0f } },	// 4: Bottom-Left-Back   (Black)
-				{ { 0.5f,  0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f } },	// 5: Bottom-Right-Back  (Red)
-				{ { -0.5f, -0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f } },	// 6: Top-Left-Back      (Green)
-				{ { 0.5f, -0.5f, -0.5f },{ 1.0f, 1.0f, 0.0f } }		// 7: Top-Right-Back     (Yellow)
+				{ { -0.5f,  0.5f, -0.5f },{ 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },	// 4: Bottom-Left-Back   (Black)
+				{ { 0.5f,  0.5f, -0.5f },{ 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },	// 5: Bottom-Right-Back  (Red)
+				{ { -0.5f, -0.5f, -0.5f },{ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },	// 6: Top-Left-Back      (Green)
+				{ { 0.5f, -0.5f, -0.5f },{ 1.0f, 1.0f, 0.0f }, { 0.0f, 1.0f } }		// 7: Top-Right-Back     (Yellow)
 			};
 			VkDeviceSize bufferSize = sizeof(VB[0]) * VB.size();
 

@@ -24,5 +24,6 @@ namespace VKRENDERER
 		vk::raii::Semaphore imageAvailableSemaphores = nullptr;
 		vk::raii::Semaphore renderFinishedSemaphore	 = nullptr;
 		vk::raii::Fence		renderFence				 = nullptr;
+		vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
 	};
 }
