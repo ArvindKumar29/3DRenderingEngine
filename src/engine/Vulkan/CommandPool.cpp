@@ -26,7 +26,7 @@ namespace VKRENDERER
 		cmdBuffer = std::move(vk::raii::CommandBuffers(ld, allocInfo).front());
 	}
 
-	void CommandPool::recordCommandBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, vk::ImageView imageView, vk::ImageView depthImageView, vk::Extent2D extent, Pipeline& pipeline, vertexBuffer& vertexBuffer, indexBuffer& indexBuffer, vk::raii::DescriptorSet& descriptorSet, glm::mat4 view, glm::mat4 proj, glm::mat4 model)
+	void CommandPool::recordCommandBuffer(vk::raii::Device& ld, vk::raii::PhysicalDevice& pd, vk::ImageView imageView, vk::ImageView depthImageView, vk::Extent2D extent, Pipeline& pipeline, Model& model, vk::raii::DescriptorSet& descriptorSet, glm::mat4 view, glm::mat4 proj, glm::mat4 modelMat)
 	{
 		
 		// Clear screen and set clear color
@@ -63,9 +63,9 @@ namespace VKRENDERER
 		vk::Rect2D scissor(vk::Offset2D(0, 0), extent);
 		cmdBuffer.setScissor(0, scissor);
 		
-		// Binding vertex buffer
-		cmdBuffer.bindVertexBuffers(0, static_cast<vk::Buffer>(vertexBuffer.buffer), { 0 });
-		cmdBuffer.bindIndexBuffer(static_cast<vk::Buffer>(indexBuffer.buffer), 0, vk::IndexType::eUint32);
+		// Binding vertex and Index buffer
+		cmdBuffer.bindVertexBuffers(0, static_cast<vk::Buffer>(model.vb.buffer),  { 0 });
+		cmdBuffer.bindIndexBuffer(static_cast<vk::Buffer>(model.ib.buffer), 0, vk::IndexType::eUint32);
 
 		// Binding Descriptor set 
 		cmdBuffer.bindDescriptorSets(
@@ -75,14 +75,20 @@ namespace VKRENDERER
 			*descriptorSet,                  // Tera updated set
 			nullptr                          // Dynamic offsets (humare paas nahi hain)
 		);
+
 		// Setting up push constants
 		cmdBuffer.pushConstants(*pipeline.graphicsPipeLineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &view);
 		cmdBuffer.pushConstants(*pipeline.graphicsPipeLineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4), sizeof(glm::mat4), &proj);
-		cmdBuffer.pushConstants(*pipeline.graphicsPipeLineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4) * 2, sizeof(glm::mat4), &model);
+		//cmdBuffer.pushConstants(*pipeline.graphicsPipeLineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4) * 2, sizeof(glm::mat4), &modelMat);
 
 		// Final draw command
 		//cmdBuffer.draw(static_cast<uint32_t>(vertexBuffer.VB.size()), 1, 0, 0);
-		cmdBuffer.drawIndexed(static_cast<uint32_t>(indexBuffer.IB.size()), 1, 0, 0, 0);
+		for (const auto& prim : model.primitives)
+		{
+			glm::mat4 finalModel = modelMat * prim.transform;
+			cmdBuffer.pushConstants(*pipeline.graphicsPipeLineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(glm::mat4) * 2, sizeof(glm::mat4), &finalModel);
+			cmdBuffer.drawIndexed(prim.indexCount, 1, prim.firstIndex, prim.vertexOffset, 0);
+		}
 
 		cmdBuffer.endRendering();
 		//cmdBuffer.end();

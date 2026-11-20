@@ -7,7 +7,7 @@ file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
 
 # 2. TARGET CREATION
 # Bundles all the discovered C++ files into a single Static Library named "engine".
-add_library(engine STATIC ${ENGINE_SOURCES} "Renderer/Camera.h" "Time.cpp" "Renderer/UI.h" "Vulkan/vma.cpp" "Vulkan/vma.h" "Renderer/StbImage.cpp" "Renderer/Texture.h" "Renderer/Texture.cpp")
+add_library(engine STATIC ${ENGINE_SOURCES} "Renderer/Camera.h" "Time.cpp" "Renderer/UI.h" "Vulkan/vma.cpp" "Vulkan/vma.h" "Renderer/StbImage.cpp" "Renderer/Texture.h" "Renderer/Texture.cpp" "Renderer/Mesh.h" "Renderer/Mesh.cpp")
 
 # Automatically mirrors your actual folder structure (e.g., core/, renderer/) inside 
 # Visual Studio's Solution Explorer so everything stays organized.
@@ -30,6 +30,7 @@ target_link_libraries(engine PUBLIC
   GPUOpen::VulkanMemoryAllocator   # Memory management
   imgui::imgui                     # GUI
   Tracy::TracyClient               # Profiler
+  fastgltf::fastgltf               # Model loading
 )
 
 # 5. C++ PREPROCESSOR MACROS (#defines)

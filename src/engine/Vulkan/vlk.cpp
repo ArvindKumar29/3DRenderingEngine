@@ -12,6 +12,8 @@ namespace VKRENDERER
 		ZoneScoped;
 		device.logicalDevice.waitIdle();
 
+		model.destroy(allocator);
+
 		descriptorSet = nullptr;
 		descriptorPool = nullptr;
 
@@ -21,9 +23,6 @@ namespace VKRENDERER
 			vmaDestroyImage(allocator, texture.image, texture.allocation);
 			texture.image = VK_NULL_HANDLE;
 		}
-
-		vb.destroy(allocator);
-		ib.destroy(allocator);
 
 		if (window.depthImage != VK_NULL_HANDLE) {
 			vmaDestroyImage(allocator, window.depthImage, window.depthImageAllocation);
@@ -43,6 +42,8 @@ namespace VKRENDERER
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 		ui.pool = nullptr;
+
+		
 
 		cmdPool.cmdBuffer = nullptr;
 		cmdPool.cmdPool = nullptr;
@@ -162,8 +163,8 @@ namespace VKRENDERER
 			vmaVulkanFunctions.vkGetDeviceProcAddr
 		);
 
-		vb.createVertexBuffer(device.logicalDevice, device.physicalDevice, allocator);
-		ib.createIndexBuffer(device.logicalDevice, device.physicalDevice, allocator);
+		// Model loading
+		model = mesh.loadFromFile("assets/CarConcept.glb", device, *m_cmdBuffer, allocator);
 
 		vk::SamplerCreateInfo samplerInfo = vk::SamplerCreateInfo()
 			.setMagFilter(vk::Filter::eNearest)
@@ -317,7 +318,7 @@ namespace VKRENDERER
 				window.depthImageView,
 				window.swapChainExtent,
 				pipeline,
-				vb, ib, descriptorSet, camera.getViewMatrix(),
+				model, descriptorSet, camera.getViewMatrix(),
 				camera.getProjectionMatrix(), modelMatrix);
 
 			window.transitionImageLayout(cmdPool.cmdBuffer, static_cast<vk::Image>(window.depthImage),

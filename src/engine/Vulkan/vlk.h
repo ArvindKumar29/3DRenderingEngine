@@ -23,6 +23,7 @@
 #include "../Renderer/Camera.h"
 #include "../Renderer/Texture.h"
 #include "../Renderer/UI.h"
+#include "../Renderer/Mesh.h"
 #include "../Time.h"
 #include "vma.h"
 
@@ -56,8 +57,6 @@ namespace VKRENDERER
 		ValidationLayers validationLayers;
 		Instance vulkanInstance;
 		Device device;
-		vertexBuffer vb;
-		indexBuffer ib;
 
 		// Renderer Stuff
 		Pipeline pipeline;
@@ -66,6 +65,8 @@ namespace VKRENDERER
 		Camera camera;
 		Texture texture;
 		Time time;
+		Mesh mesh;
+		Model model;
 		UI ui;
 
 		struct pushConstantData

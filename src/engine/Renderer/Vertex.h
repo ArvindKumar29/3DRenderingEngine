@@ -8,6 +8,7 @@ namespace VKRENDERER
 		glm::vec3 pos;
 		glm::vec3 color;
 		glm::vec2 texCoord;
+		glm::vec3 normal;
 
 		static vk::VertexInputBindingDescription getBindingDescription()
 		{
@@ -18,9 +19,9 @@ namespace VKRENDERER
 			return inputBindingDescription;
 		}
 
-		static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescription()
+		static std::array<vk::VertexInputAttributeDescription, 4> getAttributeDescription()
 		{
-			std::array<vk::VertexInputAttributeDescription, 3> inputAttributeDescription{};
+			std::array<vk::VertexInputAttributeDescription, 4> inputAttributeDescription{};
 			inputAttributeDescription[0] = vk::VertexInputAttributeDescription()
 				.setBinding(0)
 				.setLocation(0)
@@ -36,6 +37,11 @@ namespace VKRENDERER
 				.setOffset(offsetof(Vertex, texCoord))
 				.setLocation(2)
 				.setFormat(vk::Format::eR32G32Sfloat);
+			inputAttributeDescription[3] = vk::VertexInputAttributeDescription()
+				.setBinding(0)
+				.setOffset(offsetof(Vertex, normal))
+				.setLocation(3)
+				.setFormat(vk::Format::eR32G32B32Sfloat);
 			return inputAttributeDescription;
 		}
 	};

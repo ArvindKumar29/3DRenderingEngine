@@ -9,6 +9,7 @@
     "vulkan-memory-allocator",
     "stb",
     "tracy",
+    "fastgltf",
     {
       "name": "imgui",
       "features": [
